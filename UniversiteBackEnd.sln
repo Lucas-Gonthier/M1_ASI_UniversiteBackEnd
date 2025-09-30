@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversiteDomain", "UniversiteDomain\UniversiteDomain.csproj", "{F293AAE3-2981-4E0F-89F7-F115626093E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversiteDomainUnitTest", "UniversiteDomainUnitTest\UniversiteDomainUnitTest.csproj", "{48169E82-B603-4142-A06D-787BD2DE2A75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,11 +19,16 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F293AAE3-2981-4E0F-89F7-F115626093E7} = {6DAF7BF7-C083-44E1-840E-F65059EECD27}
+		{48169E82-B603-4142-A06D-787BD2DE2A75} = {1FF6B8D4-5822-4B6B-ADC4-5BB5E6ED7635}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F293AAE3-2981-4E0F-89F7-F115626093E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F293AAE3-2981-4E0F-89F7-F115626093E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F293AAE3-2981-4E0F-89F7-F115626093E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F293AAE3-2981-4E0F-89F7-F115626093E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48169E82-B603-4142-A06D-787BD2DE2A75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48169E82-B603-4142-A06D-787BD2DE2A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48169E82-B603-4142-A06D-787BD2DE2A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48169E82-B603-4142-A06D-787BD2DE2A75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
