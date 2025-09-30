@@ -1,13 +1,11 @@
-﻿using UniversiteDomain.DataAdapters;
+﻿using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
-using UniversiteDomain.Exceptions.EtudiantExceptions;
 using UniversiteDomain.Exceptions.ParcoursExceptions;
-using UniversiteDomain.Util;
 
 // ReSharper disable once IdentifierTypo
 namespace UniversiteDomain.UseCases.ParcoursUseCases.Create;
 
-public class CreateEtudiantUseCase(IParcoursRepository parcoursRepository)
+public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
 {
     public async Task<Parcours> ExecuteAsync(long id, string nomParcours, int anneeFormation)
     {
@@ -17,8 +15,8 @@ public class CreateEtudiantUseCase(IParcoursRepository parcoursRepository)
     public async Task<Parcours> ExecuteAsync(Parcours parcours)
     {
         await CheckBusinessRules(parcours);
-        Parcours par = await parcoursRepository.CreateAsync(parcours);
-        parcoursRepository.SaveChangesAsync().Wait();
+        var par = await repositoryFactory.ParcoursRepository().CreateAsync(parcours);
+        repositoryFactory.ParcoursRepository().SaveChangesAsync().Wait();
         return par;
     }
     private async Task CheckBusinessRules(Parcours parcours)
@@ -27,22 +25,20 @@ public class CreateEtudiantUseCase(IParcoursRepository parcoursRepository)
         ArgumentNullException.ThrowIfNull(parcours.Id);
         ArgumentNullException.ThrowIfNull(parcours.NomParcours);
         ArgumentNullException.ThrowIfNull(parcours.AnneeFormation);
-        ArgumentNullException.ThrowIfNull(parcoursRepository);
+        ArgumentNullException.ThrowIfNull(repositoryFactory);
         
         // On recherche un étudiant avec le même numéro étudiant
-        List<Parcours> existe = await parcoursRepository.FindByConditionAsync(e=>e.Id.Equals(parcours.Id));
+        var existe = await repositoryFactory.ParcoursRepository().FindByConditionAsync(e=>e.Id.Equals(parcours.Id));
 
         // Si un étudiant avec le même numéro étudiant existe déjà, on lève une exception personnalisée
-        if (existe is {Count:>0}) throw new Dupli(parcours.Id+ " - cet id de parcours est déjà affecté à un parcours");
+        if (existe is {Count:>0}) throw new DuplicateParcoursIdException(parcours.Id+ " - cet id de parcours est déjà affecté à un parcours");
         
-        // Vérification du format du mail
-        if (!CheckEmail.IsValidEmail(parcours.AnneeFormation)) throw new (parcours.Email + " - Email mal formé");
+        // Récupérer l'année actuelle
+        var anneeActuelle = DateTime.Now.Year;
+        // On vérifie que l'année de formation est valide (entre 1 et l'année actuelle)
+        if (parcours.AnneeFormation > anneeActuelle) throw new InvalidAnneeFormationException(parcours.AnneeFormation +" incorrect - L'année de formation ne peut pas être dans le futur");
         
-        // On vérifie si l'email est déjà utilisé
-        existe = await parcoursRepository.FindByConditionAsync(e=>e.Email.Equals(parcours.Email));
-        // Une autre façon de tester la vacuité de la liste
-        if (existe is {Count:>0}) throw new DuplicateEmailException(parcours.Email +" est déjà affecté à un étudiant");
-        // Le métier définit que les nom doite contenir plus de 3 lettres
-        if (parcours.Nom.Length < 3) throw new InvalidNomparcoursException(parcours.Nom +" incorrect - Le nom d'un étudiant doit contenir plus de 3 caractères");
+        // Le métier définit qu'un nom de parcours doit contenir au moins 3 caractères
+        if (parcours.NomParcours.Length < 3) throw new InvalidNomParcoursException(parcours.NomParcours +" incorrect - Le nom du parcours doit contenir plus de 3 caractères");
     }
 }

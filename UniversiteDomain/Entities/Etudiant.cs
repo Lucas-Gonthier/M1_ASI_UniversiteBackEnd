@@ -10,6 +10,9 @@ public class Etudiant
     
     // ManyToOne : l'étudiant est inscrit dans un parcours
     public Parcours? ParcoursSuivi { get; set; } = null;
+    
+    // Un étudiant peut avoir une note par UE
+    public Dictionary<UE, Note> NotesParUE { get; set; } = new();
 
     public override string ToString()
     {
