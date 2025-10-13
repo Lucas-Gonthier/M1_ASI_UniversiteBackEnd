@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System.Linq.Expressions;
+using Moq;
 using UniversiteDomain.DataAdapters;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
@@ -18,158 +19,167 @@ public class ParcoursUnitTest
     [Test]
     public async Task CreateParcoursUseCase()
     {
-        long idParcours = 1;
-        String nomParcours = "Ue 1";
-        int anneFormation = 2;
+        // Arrange
+        const long idParcours = 1;
+        const string nomParcours = "UE 1";
+        const int anneeFormation = 2;
 
-        // On crée le parcours qui doit être ajouté en base
-        Parcours parcoursAvant = new Parcours { NomParcours = nomParcours, AnneeFormation = anneFormation };
+        var parcoursAvant = new Parcours
+        {
+            NomParcours = nomParcours,
+            AnneeFormation = anneeFormation
+        };
 
-        // On initialise une fausse datasource qui va simuler un EtudiantRepository
-        var mockParcours = new Mock<IParcoursRepository>();
+        var parcoursFinal = new Parcours
+        {
+            ParcoursId = idParcours,
+            NomParcours = nomParcours,
+            AnneeFormation = anneeFormation
+        };
 
-        // Il faut ensuite aller dans le use case pour simuler les appels des fonctions vers la datasource
-        // Nous devons simuler FindByCondition et Create
-        // On dit à ce mock que le parcours n'existe pas déjà
-        mockParcours
-            .Setup(repo => repo.FindByConditionAsync(p => p.Id.Equals(idParcours)))
-            .ReturnsAsync((List<Parcours>)null);
-        // On lui dit que l'ajout d'un étudiant renvoie un étudiant avec l'Id 1
-        var parcoursFinal = new Parcours { Id = idParcours, NomParcours = nomParcours, AnneeFormation = anneFormation };
-        mockParcours.Setup(repo => repo.CreateAsync(parcoursAvant)).ReturnsAsync(parcoursFinal);
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
+
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(p => p.ParcoursId == idParcours))
+            .ReturnsAsync([]);
+
+        mockParcoursRepo
+            .Setup(r => r.CreateAsync(parcoursAvant))
+            .ReturnsAsync(parcoursFinal);
 
         var mockFactory = new Mock<IRepositoryFactory>();
-        mockFactory.Setup(facto => facto.ParcoursRepository()).Returns(mockParcours.Object);
+        mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
 
-        // Création du use case en utilisant le mock comme datasource
-        CreateParcoursUseCase useCase = new CreateParcoursUseCase(mockFactory.Object);
+        var useCase = new CreateParcoursUseCase(mockFactory.Object);
 
-        // Appel du use case
-        var parcoursTeste = await useCase.ExecuteAsync(parcoursAvant);
+        // Act
+        var result = await useCase.ExecuteAsync(parcoursAvant);
 
-        // Vérification du résultat
-        Assert.That(parcoursTeste.Id, Is.EqualTo(parcoursFinal.Id));
-        Assert.That(parcoursTeste.NomParcours, Is.EqualTo(parcoursFinal.NomParcours));
-        Assert.That(parcoursTeste.AnneeFormation, Is.EqualTo(parcoursFinal.AnneeFormation));
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ParcoursId, Is.EqualTo(parcoursFinal.ParcoursId));
+            Assert.That(result.NomParcours, Is.EqualTo(parcoursFinal.NomParcours));
+            Assert.That(result.AnneeFormation, Is.EqualTo(parcoursFinal.AnneeFormation));
+        });
     }
 
     [Test]
     public async Task AddEtudiantDansParcoursUseCase()
     {
-        long idEtudiant = 1;
-        long idParcours = 3;
-        Etudiant etudiant = new Etudiant { Id = 1, NumEtud = "1", Nom = "nom1", Prenom = "prenom1", Email = "1" };
-        Parcours parcours = new Parcours { Id = 3, NomParcours = "Ue 3", AnneeFormation = 1 };
+        // Arrange
+        const long idEtudiant = 1;
+        const long idParcours = 3;
 
-        // On initialise des faux repositories
-        var mockEtudiant = new Mock<IEtudiantRepository>();
-        var mockParcours = new Mock<IParcoursRepository>();
-        List<Etudiant> etudiants =
-        [
-            new() { Id = 1 }
-        ];
-        mockEtudiant
-            .Setup(repo => repo.FindByConditionAsync(e => e.Id.Equals(idEtudiant)))
-            .ReturnsAsync(etudiants);
+        var etudiant = new Etudiant
+        {
+            EtudiantId = idEtudiant,
+            NumEtud = "1",
+            Nom = "nom1",
+            Prenom = "prenom1",
+            Email = "1"
+        };
 
-        List<Parcours> parcourses = new List<Parcours>();
-        parcourses.Add(parcours);
+        var parcours = new Parcours
+        {
+            ParcoursId = idParcours,
+            NomParcours = "UE 1",
+            AnneeFormation = 1
+        };
 
-        List<Parcours> parcoursFinaux = new List<Parcours>();
-        Parcours parcoursFinal = parcours;
-        parcoursFinal.Inscrits.Add(etudiant);
-        parcoursFinaux.Add(parcours);
+        var mockEtudiantRepo = new Mock<IEtudiantRepository>();
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
 
-        mockParcours
-            .Setup(repo => repo.FindByConditionAsync(e => e.Id.Equals(idParcours)))
-            .ReturnsAsync(parcourses);
-        mockParcours
-            .Setup(repo => repo.AddEtudiantAsync(idParcours, idEtudiant))
-            .ReturnsAsync(parcoursFinal);
+        mockEtudiantRepo
+            .Setup(r => r.FindByConditionAsync(e => e.EtudiantId == idEtudiant))
+            .ReturnsAsync([etudiant]);
 
-        // Création d'une fausse factory qui contient les faux repositories
+        parcours.Inscrits!.Add(etudiant);
+
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(p => p.ParcoursId == idParcours))
+            .ReturnsAsync([parcours]);
+
+        mockParcoursRepo
+            .Setup(r => r.AddEtudiantAsync(idParcours, idEtudiant))
+            .ReturnsAsync(parcours);
+
         var mockFactory = new Mock<IRepositoryFactory>();
-        mockFactory.Setup(facto => facto.EtudiantRepository()).Returns(mockEtudiant.Object);
-        mockFactory.Setup(facto => facto.ParcoursRepository()).Returns(mockParcours.Object);
+        mockFactory.Setup(f => f.EtudiantRepository()).Returns(mockEtudiantRepo.Object);
+        mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
 
-        // Création du use case en utilisant le mock comme datasource
-        AddEtudiantDansParcoursUseCase useCase = new AddEtudiantDansParcoursUseCase(mockFactory.Object);
+        var useCase = new AddEtudiantDansParcoursUseCase(mockFactory.Object);
 
-        // Appel du use case
-        var parcoursTest = await useCase.ExecuteAsync(idParcours, idEtudiant);
-        // Vérification du résultat
-        Assert.That(parcoursTest.Id, Is.EqualTo(parcoursFinal.Id));
-        Assert.That(parcoursTest.Inscrits, Is.Not.Null);
-        Assert.That(parcoursTest.Inscrits.Count, Is.EqualTo(1));
-        Assert.That(parcoursTest.Inscrits[0].Id, Is.EqualTo(idEtudiant));
+        // Act
+        var result = await useCase.ExecuteAsync(idParcours, idEtudiant);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ParcoursId, Is.EqualTo(parcours.ParcoursId));
+            Assert.That(result.Inscrits, Is.Not.Null);
+            Assert.That(result.Inscrits, Has.Count.EqualTo(1));
+            Assert.That(result.Inscrits![0].EtudiantId, Is.EqualTo(idEtudiant));
+        });
     }
 
     [Test]
     public async Task AddUeDansParcoursUseCase()
     {
+        // Arrange
         const long idParcours = 3;
         const long idUe = 1;
 
-        // Parcours sans UE au départ
         var parcoursInitial = new Parcours
         {
-            Id = idParcours,
-            NomParcours = "Ue 3",
+            ParcoursId = idParcours,
+            NomParcours = "Développement",
             AnneeFormation = 1,
             UEsEnseignees = []
         };
 
-        var ue = new UE
-        {
-            Id = idUe,
-            Intitule = "UE1",
-            NumeroUE = "UE001"
-        };
+        var ue = new Ue(idUe, "UE001", "UE1");
 
-        // Parcours final (après ajout)
         var parcoursFinal = new Parcours
         {
-            Id = idParcours,
+            ParcoursId = idParcours,
             NomParcours = parcoursInitial.NomParcours,
             AnneeFormation = parcoursInitial.AnneeFormation,
             UEsEnseignees = [ue]
         };
 
-        // On initialise les faux repositories
-        var mockParcours = new Mock<IParcoursRepository>();
-        var mockUe = new Mock<IUERepository>();
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
+        var mockUeRepo = new Mock<IUeRepository>();
 
-        // Le parcours existe mais n’a pas encore l’UE
-        mockParcours
-            .Setup(repo => repo.FindByConditionAsync(e => e.Id.Equals(idParcours)))
-            .ReturnsAsync([parcoursInitial]);
-        
-        // L’UE existe
-        mockUe
-            .Setup(repo => repo.FindByConditionAsync(e => e.Id.Equals(idUe)))
+        mockUeRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Ue, bool>>>()))
             .ReturnsAsync([ue]);
 
-        // Ajout de l’UE dans le parcours
-        mockParcours
-            .Setup(repo => repo.AddUEAsync(idParcours, idUe))
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
+            .ReturnsAsync([parcoursInitial]);
+
+        mockParcoursRepo
+            .Setup(r => r.AddUeAsync(idParcours, idUe))
             .ReturnsAsync(parcoursFinal);
 
-        // Factory
         var mockFactory = new Mock<IRepositoryFactory>();
-        mockFactory.Setup(facto => facto.ParcoursRepository()).Returns(mockParcours.Object);
-        mockFactory.Setup(facto => facto.UERepository()).Returns(mockUe.Object);
+        mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
+        mockFactory.Setup(f => f.UeRepository()).Returns(mockUeRepo.Object);
 
-        // Use case
         var useCase = new AddUEDansParcoursUseCase(mockFactory.Object);
 
         // Act
-        var parcoursTest = await useCase.ExecuteAsync(idParcours, idUe);
+        var result = await useCase.ExecuteAsync(idParcours, idUe);
 
         // Assert
-        Assert.That(parcoursTest.Id, Is.EqualTo(parcoursFinal.Id));
-        Assert.That(parcoursTest.UEsEnseignees, Is.Not.Null);
-        Assert.That(parcoursTest.UEsEnseignees.Count, Is.EqualTo(1));
-        Assert.That(parcoursTest.UEsEnseignees[0].Id, Is.EqualTo(idUe));
-        Assert.That(parcoursTest.UEsEnseignees[0].Intitule, Is.EqualTo("UE1"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ParcoursId, Is.EqualTo(parcoursFinal.ParcoursId));
+            Assert.That(result.UEsEnseignees, Is.Not.Null);
+            Assert.That(result.UEsEnseignees, Has.Count.EqualTo(1));
+            Assert.That(result.UEsEnseignees[0].UeId, Is.EqualTo(idUe));
+            Assert.That(result.UEsEnseignees[0].Intitule, Is.EqualTo("UE1"));
+        });
     }
 }

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace UniversiteDomain.Util;
 
-public class CheckEmail
+public static class CheckEmail
 {
     public static bool IsValidEmail(string email)
     {
@@ -46,5 +46,5 @@ public class CheckEmail
         {
             return false;
         }
-    } 
+    }
 }

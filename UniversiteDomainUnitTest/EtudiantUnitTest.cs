@@ -2,10 +2,9 @@
 using Moq;
 using UniversiteDomain.DataAdapters;
 using UniversiteDomain.Entities;
-using UniversiteDomain.UseCases.EtudiantUseCases;
 using UniversiteDomain.UseCases.EtudiantUseCases.Create;
 
-namespace UniversiteDomainUnitTests;
+namespace UniversiteDomainUnitTest;
 
 public class EtudiantUnitTest
 {
@@ -13,50 +12,58 @@ public class EtudiantUnitTest
     public void Setup()
     {
     }
+
     [Test]
     public async Task CreateEtudiantUseCase()
     {
-        long id = 1;
-        String numEtud = "et1";
-        string nom = "Durant";
-        string prenom = "Jean";
-        string email = "jean.durant@etud.u-picardie.fr";
-        
-        // On crée l'étudiant qui doit être ajouté en base
-        Etudiant etudiantSansId = new Etudiant{NumEtud=numEtud, Nom = nom, Prenom=prenom, Email=email};
-        //  Créons le mock du repository
-        // On initialise une fausse datasource qui va simuler un EtudiantRepository
-        var mock = new Mock<IEtudiantRepository>();
-        // Il faut ensuite aller dans le use case pour voir quelles fonctions simuler
-        // Nous devons simuler FindByCondition et Create
-        
-        // Simulation de la fonction FindByCondition
-        // On dit à ce mock que l'étudiant n'existe pas déjà
-        // La réponse à l'appel FindByCondition est donc une liste vide
-        var reponseFindByCondition = new List<Etudiant>();
-        // On crée un bouchon dans le mock pour la fonction FindByCondition
-        // Quelque soit le paramètre de la fonction FindByCondition, on renvoie la liste vide
-        mock.Setup(repo=>repo.FindByConditionAsync(It.IsAny<Expression<Func<Etudiant, bool>>>())).ReturnsAsync(reponseFindByCondition);
-        
-        // Simulation de la fonction Create
-        // On lui dit que l'ajout d'un étudiant renvoie un étudiant avec l'Id 1
-        Etudiant etudiantCree =new Etudiant{Id=id,NumEtud=numEtud, Nom = nom, Prenom=prenom, Email=email};
-        mock.Setup(repoEtudiant=>repoEtudiant.CreateAsync(etudiantSansId)).ReturnsAsync(etudiantCree);
-        
-        // On crée le bouchon (un faux etudiantRepository). Il est prêt à être utilisé
-        var fauxEtudiantRepository = mock.Object;
-        
-        // Création du use case en injectant notre faux repository
-        CreateEtudiantUseCase useCase=new CreateEtudiantUseCase(fauxEtudiantRepository);
-        // Appel du use case
-        var etudiantTeste=await useCase.ExecuteAsync(etudiantSansId);
-        
-        // Vérification du résultat
-        Assert.That(etudiantTeste.Id, Is.EqualTo(etudiantCree.Id));
-        Assert.That(etudiantTeste.NumEtud, Is.EqualTo(etudiantCree.NumEtud));
-        Assert.That(etudiantTeste.Nom, Is.EqualTo(etudiantCree.Nom));
-        Assert.That(etudiantTeste.Prenom, Is.EqualTo(etudiantCree.Prenom));
-        Assert.That(etudiantTeste.Email, Is.EqualTo(etudiantCree.Email));
-    }
+        // Arrange
+        const long id = 1;
+        const string numEtud = "et1";
+        const string nom = "Durant";
+        const string prenom = "Jean";
+        const string email = "jean.durant@etud.u-picardie.fr";
 
+        var etudiantSansId = new Etudiant
+        {
+            NumEtud = numEtud,
+            Nom = nom,
+            Prenom = prenom,
+            Email = email
+        };
+
+        var etudiantCree = new Etudiant
+        {
+            EtudiantId = id,
+            NumEtud = numEtud,
+            Nom = nom,
+            Prenom = prenom,
+            Email = email
+        };
+
+        var mockEtudiantRepo = new Mock<IEtudiantRepository>();
+
+        mockEtudiantRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Etudiant, bool>>>()))
+            .ReturnsAsync(new List<Etudiant>()); // aucun étudiant trouvé
+
+        mockEtudiantRepo
+            .Setup(r => r.CreateAsync(etudiantSansId))
+            .ReturnsAsync(etudiantCree);
+
+        var useCase = new CreateEtudiantUseCase(mockEtudiantRepo.Object);
+
+        // Act
+        var result = await useCase.ExecuteAsync(etudiantSansId);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.EtudiantId, Is.EqualTo(etudiantCree.EtudiantId));
+            Assert.That(result.NumEtud, Is.EqualTo(etudiantCree.NumEtud));
+            Assert.That(result.Nom, Is.EqualTo(etudiantCree.Nom));
+            Assert.That(result.Prenom, Is.EqualTo(etudiantCree.Prenom));
+            Assert.That(result.Email, Is.EqualTo(etudiantCree.Email));
+        });
+    }
+    
 }

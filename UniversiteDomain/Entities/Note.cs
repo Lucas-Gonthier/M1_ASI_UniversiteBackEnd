@@ -1,9 +1,13 @@
 namespace UniversiteDomain.Entities;
 
-public class Note
+public class Note(float valeur)
 {
-    public float Valeur { get; set; } = 0.0f;
-    
+    public float Valeur { get; } = valeur;
+
+    public Ue? Ue { get; set; }
+
+    public Etudiant? Etudiant { get; set; }
+
     public override string ToString()
     {
         return $"Note : {Valeur}";
