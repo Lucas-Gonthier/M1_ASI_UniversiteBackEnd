@@ -1,17 +1,13 @@
 namespace UniversiteDomain.Entities;
 
-public class Ue(long ueId, string NumeroUe, string Intitule)
+public class Ue
 {
-    public long UeId { get; init; } = ueId;
-    public string NumeroUe { get; init; } = string.Empty;
-    public string Intitule { get; init; } = string.Empty;
+    public long UeId { get; set; }
+    public string NumeroUe { get; set; } = string.Empty;
+    public string Intitule { get; set; } = string.Empty;
 
-    public List<Parcours> EnseigneeDans { get; set; } = [];
+    public ICollection<Parcours> EnseigneeDans { get; set; } = new List<Parcours>();
+    public ICollection<Note> NotesDesEtudiants { get; set; } = new List<Note>();
 
-    public List<Note> NotesDesEtudiants { get; set; } = [];
-
-    public override string ToString()
-    {
-        return $"ID {UeId} : {NumeroUe} - {Intitule}";
-    }
+    public override string ToString() => $"ID {UeId} : {NumeroUe} - {Intitule}";
 }

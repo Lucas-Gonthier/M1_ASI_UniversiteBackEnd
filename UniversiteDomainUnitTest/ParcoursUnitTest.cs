@@ -138,7 +138,12 @@ public class ParcoursUnitTest
             UEsEnseignees = []
         };
 
-        var ue = new Ue(idUe, "UE001", "UE1");
+        var ue = new Ue
+        {
+            UeId = idUe,
+            Intitule = "Unité d'enseignement 1",
+            NumeroUe = "UE1"
+        };
 
         var parcoursFinal = new Parcours
         {

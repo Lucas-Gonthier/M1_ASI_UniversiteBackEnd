@@ -19,67 +19,65 @@ public class UniversiteDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseLoggerFactory(ConsoleLogger) //on lie le contexte avec le système de journalisation
+        optionsBuilder.UseLoggerFactory(ConsoleLogger) // on lie le contexte avec le système de journalisation
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Propriétés de la table Etudiant
-        // Clé primaire
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Etudiant>()
-            .HasKey(e => e.EtudiantId);
-        // ManyToOne vers parcours
-        modelBuilder.Entity<Etudiant>()
-            .HasOne(e => e.ParcoursSuivi)
-            .WithMany(p => p.Inscrits);
-        // OneToMany vers Note
-        modelBuilder.Entity<Etudiant>()
-            .HasMany(e => e.Notes)
-            .WithOne(n => n.Etudiant);
+        
+        modelBuilder.Entity<Etudiant>(e =>
+        {
+            e.HasKey(x => x.EtudiantId);
 
-        // Propriétés de la table Parcours
-        // Clé primaire
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Parcours>()
-            .HasKey(p => p.ParcoursId);
-        // ManyToOne vers Etudiant
-        modelBuilder.Entity<Parcours>()
-            .HasMany(p => p.Inscrits)
-            .WithOne(e => e.ParcoursSuivi);
-        // ManyToMany vers Ue
-        modelBuilder.Entity<Parcours>()
-            .HasMany(p => p.UEsEnseignees)
-            .WithMany(ue => ue.EnseigneeDans);
+            // FK optionnelle vers Parcours (nécessite Etudiant.ParcoursId)
+            e.HasOne(x => x.ParcoursSuivi)
+                .WithMany(p => p.Inscrits)
+                .HasForeignKey(x => x.ParcoursId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
-        // Propriétés de la table Ue
-        // Clé primaire
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Ue>()
-            .HasKey(ue => ue.UeId);
-        // ManyToMany vers Parcours
-        modelBuilder.Entity<Ue>()
-            .HasMany(ue => ue.EnseigneeDans)
-            .WithMany(p => p.UEsEnseignees);
-        // OneToMany vers Note
-        modelBuilder.Entity<Ue>()
-            .HasMany(ue => ue.NotesDesEtudiants)
-            .WithOne(n => n.Ue);
+            e.HasMany(x => x.Notes)
+                .WithOne(n => n.Etudiant)
+                .HasForeignKey(n => n.EtudiantId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<Parcours>(p =>
+        {
+            p.HasKey(x => x.ParcoursId);
 
-        // Propriétés de la table Note
-        // Clé primaire composite
-        modelBuilder.Entity<Note>()
-            .HasKey(n => new { Id = n.Etudiant!.EtudiantId, n.Ue!.UeId });
-        // ManyToOne vers Etudiant
-        modelBuilder.Entity<Note>()
-            .HasOne(n => n.Etudiant)
-            .WithMany(e => e.Notes);
-        // ManyToOne vers Ue
-        modelBuilder.Entity<Note>()
-            .HasOne(n => n.Ue)
-            .WithMany(ue => ue.NotesDesEtudiants);
+            // Many-to-many auto (table de jointure gérée par EF)
+            p.HasMany(x => x.UEsEnseignees)
+                .WithMany(u => u.EnseigneeDans);
+        });
+        
+        modelBuilder.Entity<Ue>(u =>
+        {
+            u.HasKey(x => x.UeId);
+
+            u.HasMany(x => x.NotesDesEtudiants)
+                .WithOne(n => n.Ue)
+                .HasForeignKey(n => n.UeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        modelBuilder.Entity<Note>(n =>
+        {
+            n.HasKey(x => new { x.EtudiantId, x.UeId });
+
+            n.HasOne(x => x.Etudiant)
+                .WithMany(e => e.Notes)
+                .HasForeignKey(x => x.EtudiantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            n.HasOne(x => x.Ue)
+                .WithMany(u => u.NotesDesEtudiants)
+                .HasForeignKey(x => x.UeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     public DbSet<Parcours>? Parcours { get; set; }

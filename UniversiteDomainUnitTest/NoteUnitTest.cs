@@ -29,8 +29,13 @@ public class NoteUnitTest
         const string prenom = "Jean";
         const string email = "jean.durant@etud.u-picardie.fr";
 
-        var ue = new Ue(1, "Unité d'enseignement 1", "UE1");
-        
+        var ue = new Ue
+        {
+            UeId = 1,
+            Intitule = "Unité d'enseignement 1",
+            NumeroUe = "UE1"
+        };
+
         var parcours = new Parcours
         {
             ParcoursId = idParcours,
