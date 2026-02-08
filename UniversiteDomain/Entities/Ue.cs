@@ -2,7 +2,7 @@ namespace UniversiteDomain.Entities;
 
 public class Ue
 {
-    public long UeId { get; init; }
+    public long UeId { get; set; }
     public string NumeroUe { get; init; } = string.Empty;
     public string Intitule { get; init; } = string.Empty;
 

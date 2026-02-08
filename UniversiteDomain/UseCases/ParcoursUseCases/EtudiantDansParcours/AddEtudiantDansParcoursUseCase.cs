@@ -55,4 +55,9 @@ public class AddEtudiantDansParcoursUseCase(IRepositoryFactory repositoryFactory
                                                     " est déjà inscrit dans le parcours dans le parcours : " +
                                                     idParcours);
     }
+
+    public static bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Responsable) || role.Equals(Roles.Scolarite);
+    }
 }

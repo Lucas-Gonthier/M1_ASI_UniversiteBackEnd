@@ -69,4 +69,8 @@ public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
         return Task.CompletedTask;
     }
     
+    public static bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Responsable) || role.Equals(Roles.Scolarite);
+    }
 }

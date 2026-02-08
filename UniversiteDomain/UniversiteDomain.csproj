@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -10,8 +10,6 @@
     <ItemGroup>
       <Folder Include="UseCases\EtudiantUseCases\Delete\" />
       <Folder Include="UseCases\EtudiantUseCases\Create\" />
-      <Folder Include="UseCases\EtudiantUseCases\Get\" />
-      <Folder Include="UseCases\EtudiantUseCases\Update\" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 
 public class Etudiant
 {
-    public long EtudiantId { get; init; }
+    public long EtudiantId { get; set; }
     public string NumEtud { get; init; } = string.Empty;
     public string Nom { get; init; } = string.Empty;
     public string Prenom { get; init; } = string.Empty;

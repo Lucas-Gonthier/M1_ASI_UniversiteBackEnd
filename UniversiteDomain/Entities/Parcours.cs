@@ -2,7 +2,7 @@
 
 public class Parcours
 {
-    public long ParcoursId { get; init; }
+    public long ParcoursId { get; set; }
     public string NomParcours { get; init; } = string.Empty;
 
     public int AnneeFormation { get; init; } = 1;

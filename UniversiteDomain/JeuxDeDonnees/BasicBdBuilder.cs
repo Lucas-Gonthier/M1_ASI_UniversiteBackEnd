@@ -5,13 +5,14 @@ using UniversiteDomain.UseCases.NoteUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.EtudiantDansParcours;
 using UniversiteDomain.UseCases.ParcoursUseCases.UeDansParcours;
+using UniversiteDomain.UseCases.SecurityUseCases.Create;
 using UniversiteDomain.UseCases.UeUseCases.Create;
 
 namespace UniversiteDomain.JeuxDeDonnees;
 
 public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(repositoryFactory)
 {
-    private readonly string _password = "Miage2025#";
+    private const string Password = "Miage2025#";
 
     private readonly Etudiant[] _etudiants =
     [
@@ -144,15 +145,15 @@ public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(re
 
     protected override async Task BuildEtudiantsAsync()
     {
-        foreach (Etudiant e in _etudiants)
+        foreach (var e in _etudiants)
         {
-            await new CreateEtudiantUseCase(_repositoryFactory.EtudiantRepository()).ExecuteAsync(e);
+            await new CreateEtudiantUseCase(_repositoryFactory).ExecuteAsync(e);
         }
     }
 
     protected override async Task BuildParcoursAsync()
     {
-        foreach (Parcours parcours in _parcours)
+        foreach (var parcours in _parcours)
         {
             await new CreateParcoursUseCase(_repositoryFactory).ExecuteAsync(parcours);
         }
@@ -160,7 +161,7 @@ public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(re
 
     protected override async Task BuildUesAsync()
     {
-        foreach (Ue ue in _ues)
+        foreach (var ue in _ues)
         {
             await new CreateUeUseCase(_repositoryFactory).ExecuteAsync(ue);
         }
@@ -168,7 +169,7 @@ public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(re
 
     protected override async Task InscrireEtudiantsAsync()
     {
-        foreach (Inscription i in _inscriptions)
+        foreach (var i in _inscriptions)
         {
             await new AddEtudiantDansParcoursUseCase(_repositoryFactory).ExecuteAsync(i.ParcoursId, i.EtudiantId);
         }
@@ -176,7 +177,7 @@ public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(re
 
     protected override async Task BuildMaquetteAsync()
     {
-        foreach (UeDansParcours u in _maquette)
+        foreach (var u in _maquette)
         {
             await new AddUeDansParcoursUseCase(_repositoryFactory).ExecuteAsync(u.ParcoursId, u.UeId);
         }
@@ -192,31 +193,25 @@ public class BasicBdBuilder(IRepositoryFactory repositoryFactory) : BdBuilder(re
 
     protected override async Task BuildRolesAsync()
     {
-        /*
-        // A décommenter quand on aura rajouté les rôles
-// Création des rôles dans la table aspnetroles
-await new CreateUniversiteRoleUseCase(repositoryFactory).ExecuteAsync(Roles.Responsable);
-await new CreateUniversiteRoleUseCase(repositoryFactory).ExecuteAsync(Roles.Scolarite);
-await new CreateUniversiteRoleUseCase(repositoryFactory).ExecuteAsync(Roles.Etudiant);
-        */
+        // Création des rôles dans la table aspnetroles
+        await new CreateUniversiteRoleUseCase(_repositoryFactory).ExecuteAsync(Roles.Responsable);
+        await new CreateUniversiteRoleUseCase(_repositoryFactory).ExecuteAsync(Roles.Scolarite);
+        await new CreateUniversiteRoleUseCase(_repositoryFactory).ExecuteAsync(Roles.Etudiant);
     }
 
     protected override async Task BuildUsersAsync()
     {
-        /*
-        // A décommenter quand on aura rajouté les Users
-CreateUniversiteUserUseCase uc = new CreateUniversiteUserUseCase(repositoryFactory);
-// Création des étudiants
-foreach (var etudiant in _etudiants)
-{
-    await uc.ExecuteAsync(etudiant.Email, etudiant.Email, this.Password, Roles.Etudiant,etudiant);
-}
+        var uc = new CreateUniversiteUserUseCase(_repositoryFactory);
+        // Création des étudiants
+        foreach (var etudiant in _etudiants)
+        {
+            await uc.ExecuteAsync(etudiant.Email, etudiant.Email, Password, Roles.Etudiant, etudiant);
+        }
 
-// Création des responsbles
-foreach (var user in _usersNonEtudiants)
-{
-    await uc.ExecuteAsync(user.Email, user.Email, this.Password, user.Role, null);
-}
-        */
+        // Création des responsbles
+        foreach (var user in _usersNonEtudiants)
+        {
+            await uc.ExecuteAsync(user.Email, user.Email, Password, user.Role, null);
+        }
     }
 }

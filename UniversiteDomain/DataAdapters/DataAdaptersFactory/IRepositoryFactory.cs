@@ -6,7 +6,9 @@ public interface IRepositoryFactory
     IEtudiantRepository EtudiantRepository();
     INoteRepository NoteRepository();
     IUeRepository UeRepository();
-    
+    IUniversiteRoleRepository UniversiteRoleRepository();
+    IUniversiteUserRepository UniversiteUserRepository();
+
     // Méthodes de gestion de la datasource
     // Ce sont des méthodes qui permettent de gérer l'ensemble du data source
     // comme par exemple tout supprimer ou tout créer

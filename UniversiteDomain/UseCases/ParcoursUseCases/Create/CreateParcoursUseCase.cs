@@ -44,4 +44,9 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
             throw new InvalidNomParcoursException(parcours.NomParcours +
                                                   " incorrect - Le nom du parcours doit contenir au moins 2 caractères");
     }
+
+    public static bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Responsable);
+    }
 }

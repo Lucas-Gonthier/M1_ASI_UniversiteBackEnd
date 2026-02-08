@@ -1,16 +1,23 @@
+using Microsoft.AspNetCore.Identity;
 using UniversiteDomain.DataAdapters;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteEFDataProvider.Data;
+using UniversiteEFDataProvider.Entities;
 using UniversiteEFDataProvider.Repositories;
 
 namespace UniversiteEFDataProvider.RepositoryFactories;
 
-public class RepositoryFactory(UniversiteDbContext context) : IRepositoryFactory
+public class RepositoryFactory(
+    UniversiteDbContext context,
+    RoleManager<UniversiteRole>? roleManager = null,
+    UserManager<UniversiteUser>? userManager = null) : IRepositoryFactory
 {
     private IParcoursRepository? _parcours;
     private IEtudiantRepository? _etudiants;
     private IUeRepository? _ues;
     private INoteRepository? _notes;
+    private IUniversiteRoleRepository? _universiteRoles;
+    private IUniversiteUserRepository? _universiteUsers;
 
     public IParcoursRepository ParcoursRepository()
     {
@@ -25,6 +32,24 @@ public class RepositoryFactory(UniversiteDbContext context) : IRepositoryFactory
     public IUeRepository UeRepository()
     {
         return _ues ??= new UeRepository(context ?? throw new InvalidOperationException());
+    }
+
+    public IUniversiteRoleRepository UniversiteRoleRepository()
+    {
+        if (roleManager == null)
+            throw new InvalidOperationException(
+                "RoleManager n'a pas été injecté dans RepositoryFactory. Impossible d'instancier UniversiteRoleRepository.");
+
+        return _universiteRoles ??= new UniversiteRoleRepository(context, roleManager);
+    }
+
+    public IUniversiteUserRepository UniversiteUserRepository()
+    {
+        if (userManager == null || roleManager == null)
+            throw new InvalidOperationException(
+                "UserManager et/ou RoleManager n'ont pas été injectés dans RepositoryFactory. Impossible d'instancier UniversiteUserRepository.");
+
+        return _universiteUsers ??= new UniversiteUserRepository(context, userManager, roleManager);
     }
 
     public INoteRepository NoteRepository()

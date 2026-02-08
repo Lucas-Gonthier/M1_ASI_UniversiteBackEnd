@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Moq;
 using UniversiteDomain.DataAdapters;
+using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
 using UniversiteDomain.UseCases.EtudiantUseCases.Create;
 
@@ -40,6 +41,7 @@ public class EtudiantUnitTest
             Email = email
         };
 
+        // Mock du repository étudiant
         var mockEtudiantRepo = new Mock<IEtudiantRepository>();
 
         mockEtudiantRepo
@@ -50,7 +52,12 @@ public class EtudiantUnitTest
             .Setup(r => r.CreateAsync(etudiantSansId))
             .ReturnsAsync(etudiantCree);
 
-        var useCase = new CreateEtudiantUseCase(mockEtudiantRepo.Object);
+        var mockRepoFactory = new Mock<IRepositoryFactory>();
+        mockRepoFactory
+            .Setup(f => f.EtudiantRepository())
+            .Returns(mockEtudiantRepo.Object);
+
+        var useCase = new CreateEtudiantUseCase(mockRepoFactory.Object);
 
         // Act
         var result = await useCase.ExecuteAsync(etudiantSansId);
@@ -65,5 +72,4 @@ public class EtudiantUnitTest
             Assert.That(result.Email, Is.EqualTo(etudiantCree.Email));
         });
     }
-    
 }
