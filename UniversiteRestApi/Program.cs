@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
+using UniversiteDomain.JeuxDeDonnees;
 using UniversiteEFDataProvider.Data;
 using UniversiteEFDataProvider.RepositoryFactories;
 
@@ -17,7 +18,7 @@ builder.Services.AddLogging(options =>
 });
 
 // Configuration de la connexion à MySql
-String connectionString = builder.Configuration.GetConnectionString("MySqlConnection") ?? throw new InvalidOperationException("Connection string 'MySqlConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("MySqlConnection") ?? throw new InvalidOperationException("Connection string 'MySqlConnection' not found.");
 // Création du contexte de la base de données en utilisant la connexion MySql que l'on vient de définir
 // Ce contexte est rajouté dans les services de l'application, toujours prêt à être utilisé par injection de dépendances
 builder.Services.AddDbContext<UniversiteDbContext>(options =>options.UseMySQL(connectionString));
@@ -52,6 +53,18 @@ using(var scope = app.Services.CreateScope())
     // Recréation des tables vides
     logger.LogInformation("Création de la BD et des tables à partir des entities");
     await context.Database.EnsureCreatedAsync();
+}
+
+// Initisation de la base de données
+ILogger seedLogger = app.Services.GetRequiredService<ILogger<BdBuilder>>();
+seedLogger.LogInformation("Chargement des données de test");
+using(var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<UniversiteDbContext>();
+    var repositoryFactory = scope.ServiceProvider.GetRequiredService<IRepositoryFactory>();   
+    // C'est ici que vous changez le jeu de données pour démarrer sur une base vide par exemple
+    BdBuilder seedBd = new BasicBdBuilder(repositoryFactory);
+    await seedBd.BuildUniversiteBdAsync();
 }
 
 // Exécution de l'application

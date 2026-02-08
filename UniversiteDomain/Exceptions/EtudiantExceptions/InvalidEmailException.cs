@@ -3,7 +3,7 @@
 [Serializable]
 public class InvalidEmailException : Exception
 {
-    public InvalidEmailException() : base()
+    public InvalidEmailException()
     {
     }
 

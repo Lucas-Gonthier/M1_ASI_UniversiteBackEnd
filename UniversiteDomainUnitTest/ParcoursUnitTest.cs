@@ -172,7 +172,7 @@ public class ParcoursUnitTest
         mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
         mockFactory.Setup(f => f.UeRepository()).Returns(mockUeRepo.Object);
 
-        var useCase = new AddUEDansParcoursUseCase(mockFactory.Object);
+        var useCase = new AddUeDansParcoursUseCase(mockFactory.Object);
 
         // Act
         var result = await useCase.ExecuteAsync(idParcours, idUe);

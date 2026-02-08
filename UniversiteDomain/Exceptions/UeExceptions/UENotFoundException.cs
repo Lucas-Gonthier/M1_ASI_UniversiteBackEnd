@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.UEExceptions;
 [Serializable]
 public class UeNotFoundException : Exception
 {
-    public UeNotFoundException() : base()
+    public UeNotFoundException()
     {
     }
 

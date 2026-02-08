@@ -8,12 +8,6 @@ namespace UniversiteDomain.UseCases.EtudiantUseCases.Create;
 
 public class CreateEtudiantUseCase(IEtudiantRepository etudiantRepository)
 {
-    public async Task<Etudiant> ExecuteAsync(string numEtud, string nom, string prenom, string email)
-    {
-        var etudiant = new Etudiant { NumEtud = numEtud, Nom = nom, Prenom = prenom, Email = email };
-        return await ExecuteAsync(etudiant);
-    }
-
     public async Task<Etudiant> ExecuteAsync(Etudiant etudiant)
     {
         await CheckBusinessRules(etudiant);
@@ -30,7 +24,7 @@ public class CreateEtudiantUseCase(IEtudiantRepository etudiantRepository)
         ArgumentNullException.ThrowIfNull(etudiantRepository);
 
         // On recherche un étudiant avec le même numéro étudiant
-        List<Etudiant> existe = await etudiantRepository.FindByConditionAsync(e => e.NumEtud.Equals(etudiant.NumEtud));
+        var existe = await etudiantRepository.FindByConditionAsync(e => e.NumEtud.Equals(etudiant.NumEtud));
 
         // Si un étudiant avec le même numéro étudiant existe déjà, on lève une exception personnalisée
         if (existe is { Count: > 0 })
@@ -46,6 +40,7 @@ public class CreateEtudiantUseCase(IEtudiantRepository etudiantRepository)
         // Une autre façon de tester la vacuité de la liste
         if (existe is { Count: > 0 })
             throw new DuplicateEmailException(etudiant.Email + " est déjà affecté à un étudiant");
+        
         // Le métier définit que les noms doivent contenir plus de 3 lettres
         if (etudiant.Nom.Length < 3)
             throw new InvalidNomEtudiantException(etudiant.Nom +

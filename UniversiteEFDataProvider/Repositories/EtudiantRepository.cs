@@ -22,5 +22,4 @@ public class EtudiantRepository(UniversiteDbContext context) : Repository<Etudia
     {
         await AffecterParcoursAsync(etudiant.EtudiantId, parcours.ParcoursId);
     }
-    
 }

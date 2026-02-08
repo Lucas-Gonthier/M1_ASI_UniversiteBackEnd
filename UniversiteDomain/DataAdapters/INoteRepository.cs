@@ -2,6 +2,4 @@ using UniversiteDomain.Entities;
 
 namespace UniversiteDomain.DataAdapters;
 
-public interface INoteRepository : IRepository<Note>
-{
-}
+public interface INoteRepository : IRepository<Note>;

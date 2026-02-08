@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.ParcoursExceptions;
 [Serializable]
 public class InvalidAnneeFormationException : Exception
 {
-    public InvalidAnneeFormationException() : base()
+    public InvalidAnneeFormationException()
     {
     }
 

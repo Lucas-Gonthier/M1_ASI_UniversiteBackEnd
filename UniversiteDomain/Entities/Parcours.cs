@@ -2,19 +2,14 @@
 
 public class Parcours
 {
-    public long ParcoursId { get; set; }
-    public string NomParcours { get; set; } = String.Empty;
+    public long ParcoursId { get; init; }
+    public string NomParcours { get; init; } = string.Empty;
 
-    public int AnneeFormation { get; set; } = 1;
+    public int AnneeFormation { get; init; } = 1;
 
-    // OneToMany : un parcours contient plusieurs étudiants
-    // Remarque : pour éviter quelques NullPointerException disgracieux, j'ai choisi de créer une liste d'incrits vide quand aucun étudiant n'est inscrit dans un parcours plutôt que de l'initialiser à null
-    public List<Etudiant>? Inscrits { get; set; } = new();
+    public List<Etudiant>? Inscrits { get; init; } = [];
 
-    public List<Ue> UEsEnseignees { get; set; } = [];
+    public List<Ue> UEsEnseignees { get; init; } = [];
 
-    public override string ToString()
-    {
-        return $"ID {ParcoursId} : {NomParcours} - Année {AnneeFormation}";
-    }
+    public override string ToString() => $"ID {ParcoursId} : {NomParcours} - Année {AnneeFormation}";
 }

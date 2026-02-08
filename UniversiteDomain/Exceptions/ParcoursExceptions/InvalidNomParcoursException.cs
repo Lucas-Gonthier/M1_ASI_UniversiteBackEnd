@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.ParcoursExceptions;
 [Serializable]
 public class InvalidNomParcoursException : Exception
 {
-    public InvalidNomParcoursException() : base()
+    public InvalidNomParcoursException()
     {
     }
 

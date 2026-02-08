@@ -3,7 +3,7 @@
 [Serializable]
 public class DuplicateEmailException : Exception
 {
-    public DuplicateEmailException() : base()
+    public DuplicateEmailException()
     {
     }
 

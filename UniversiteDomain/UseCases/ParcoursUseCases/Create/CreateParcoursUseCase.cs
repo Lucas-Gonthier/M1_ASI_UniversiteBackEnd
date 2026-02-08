@@ -7,12 +7,6 @@ namespace UniversiteDomain.UseCases.ParcoursUseCases.Create;
 
 public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
 {
-    public async Task<Parcours> ExecuteAsync(long id, string nomParcours, int anneeFormation)
-    {
-        var parcours = new Parcours() { ParcoursId = id, NomParcours = nomParcours, AnneeFormation = anneeFormation };
-        return await ExecuteAsync(parcours);
-    }
-
     public async Task<Parcours> ExecuteAsync(Parcours parcours)
     {
         await CheckBusinessRules(parcours);
@@ -30,7 +24,8 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
         ArgumentNullException.ThrowIfNull(repositoryFactory);
 
         // On recherche un étudiant avec le même numéro étudiant
-        var existe = await repositoryFactory.ParcoursRepository().FindByConditionAsync(e => e.ParcoursId.Equals(parcours.ParcoursId));
+        var existe = await repositoryFactory.ParcoursRepository()
+            .FindByConditionAsync(e => e.ParcoursId.Equals(parcours.ParcoursId));
 
         // Si un étudiant avec le même numéro étudiant existe déjà, on lève une exception personnalisée
         if (existe is { Count: > 0 })
@@ -44,9 +39,9 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
             throw new InvalidAnneeFormationException(parcours.AnneeFormation +
                                                      " incorrect - L'année de formation ne peut pas être dans le futur");
 
-        // Le métier définit qu'un nom de parcours doit contenir au moins 3 caractères
-        if (parcours.NomParcours.Length < 3)
+        // Le métier définit qu'un nom de parcours doit contenir au moins 2 caractères
+        if (parcours.NomParcours.Length < 2)
             throw new InvalidNomParcoursException(parcours.NomParcours +
-                                                  " incorrect - Le nom du parcours doit contenir plus de 3 caractères");
+                                                  " incorrect - Le nom du parcours doit contenir au moins 2 caractères");
     }
 }

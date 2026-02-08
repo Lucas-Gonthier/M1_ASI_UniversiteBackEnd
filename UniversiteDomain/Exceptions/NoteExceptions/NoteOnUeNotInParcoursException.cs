@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.NoteExceptions;
 [Serializable]
 public class NoteOnUeNotInParcoursException : Exception
 {
-    public NoteOnUeNotInParcoursException() : base()
+    public NoteOnUeNotInParcoursException()
     {
     }
 

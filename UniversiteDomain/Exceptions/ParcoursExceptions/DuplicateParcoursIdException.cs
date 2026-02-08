@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.ParcoursExceptions;
 [Serializable]
 public class DuplicateParcoursIdException : Exception
 {
-    public DuplicateParcoursIdException() : base()
+    public DuplicateParcoursIdException()
     {
     }
 

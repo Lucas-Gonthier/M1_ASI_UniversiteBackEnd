@@ -3,7 +3,7 @@
 [Serializable]
 public class DuplicateInscriptionException : Exception
 {
-    public DuplicateInscriptionException() : base()
+    public DuplicateInscriptionException()
     {
     }
 

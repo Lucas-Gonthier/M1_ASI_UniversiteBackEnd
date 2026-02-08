@@ -3,7 +3,7 @@
 [Serializable]
 public class EtudiantNotFoundException : Exception
 {
-    public EtudiantNotFoundException() : base()
+    public EtudiantNotFoundException()
     {
     }
 

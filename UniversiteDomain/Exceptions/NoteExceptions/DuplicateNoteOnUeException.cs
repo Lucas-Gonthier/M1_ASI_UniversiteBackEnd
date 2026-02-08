@@ -3,7 +3,7 @@ namespace UniversiteDomain.Exceptions.NoteExceptions;
 [Serializable]
 public class DuplicateNoteOnUeException : Exception
 {
-    public DuplicateNoteOnUeException() : base()
+    public DuplicateNoteOnUeException()
     {
     }
 

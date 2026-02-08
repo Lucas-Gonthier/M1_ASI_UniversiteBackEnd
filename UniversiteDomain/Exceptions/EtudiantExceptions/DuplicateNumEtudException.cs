@@ -3,7 +3,7 @@
 [Serializable]
 public class DuplicateNumEtudException : Exception
 {
-    public DuplicateNumEtudException() : base()
+    public DuplicateNumEtudException()
     {
     }
 

@@ -4,11 +4,11 @@ namespace UniversiteDomain.Dtos;
 
 public class EtudiantDto(long id, string numEtud, string nom, string prenom, string email)
 {
-    public long Id { get; set; } = id;
-    public string NumEtud { get; set; } = numEtud;
-    public string Nom { get; set; } = nom;
-    public string Prenom { get; set; } = prenom;
-    public string Email { get; set; } = email;
+    public long Id { get; } = id;
+    public string NumEtud { get; } = numEtud;
+    public string Nom { get; } = nom;
+    public string Prenom { get; } = prenom;
+    public string Email { get; } = email;
 
     public static EtudiantDto ToDto(Etudiant etudiant)
     {

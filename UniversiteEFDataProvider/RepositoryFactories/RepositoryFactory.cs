@@ -14,42 +14,22 @@ public class RepositoryFactory(UniversiteDbContext context) : IRepositoryFactory
 
     public IParcoursRepository ParcoursRepository()
     {
-        if (_parcours == null)
-        {
-            _parcours = new ParcoursRepository(context ?? throw new InvalidOperationException());
-        }
-
-        return _parcours;
+        return _parcours ??= new ParcoursRepository(context ?? throw new InvalidOperationException());
     }
 
     public IEtudiantRepository EtudiantRepository()
     {
-        if (_etudiants == null)
-        {
-            _etudiants = new EtudiantRepository(context ?? throw new InvalidOperationException());
-        }
-
-        return _etudiants;
+        return _etudiants ??= new EtudiantRepository(context ?? throw new InvalidOperationException());
     }
 
     public IUeRepository UeRepository()
     {
-        if (_ues == null)
-        {
-            _ues = new UeRepository(context ?? throw new InvalidOperationException());
-        }
-
-        return _ues;
+        return _ues ??= new UeRepository(context ?? throw new InvalidOperationException());
     }
 
     public INoteRepository NoteRepository()
     {
-        if (_notes == null)
-        {
-            _notes = new NoteRepository(context ?? throw new InvalidOperationException());
-        }
-
-        return _notes;
+        return _notes ??= new NoteRepository(context ?? throw new InvalidOperationException());
     }
 
     public Task SaveChangesAsync()

@@ -3,7 +3,7 @@
 [Serializable]
 public class InvalidNomEtudiantException : Exception
 {
-    public InvalidNomEtudiantException() : base()
+    public InvalidNomEtudiantException()
     {
     }
 

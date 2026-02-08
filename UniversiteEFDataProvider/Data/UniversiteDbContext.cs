@@ -19,7 +19,7 @@ public class UniversiteDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseLoggerFactory(ConsoleLogger) // on lie le contexte avec le système de journalisation
+        optionsBuilder.UseLoggerFactory(ConsoleLogger)
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors();
     }
@@ -27,12 +27,11 @@ public class UniversiteDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Etudiant>(e =>
         {
             e.HasKey(x => x.EtudiantId);
 
-            // FK optionnelle vers Parcours (nécessite Etudiant.ParcoursId)
             e.HasOne(x => x.ParcoursSuivi)
                 .WithMany(p => p.Inscrits)
                 .HasForeignKey(x => x.ParcoursId)
@@ -44,16 +43,15 @@ public class UniversiteDbContext : DbContext
                 .HasForeignKey(n => n.EtudiantId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        
+
         modelBuilder.Entity<Parcours>(p =>
         {
             p.HasKey(x => x.ParcoursId);
 
-            // Many-to-many auto (table de jointure gérée par EF)
             p.HasMany(x => x.UEsEnseignees)
                 .WithMany(u => u.EnseigneeDans);
         });
-        
+
         modelBuilder.Entity<Ue>(u =>
         {
             u.HasKey(x => x.UeId);
@@ -63,7 +61,7 @@ public class UniversiteDbContext : DbContext
                 .HasForeignKey(n => n.UeId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-        
+
         modelBuilder.Entity<Note>(n =>
         {
             n.HasKey(x => new { x.EtudiantId, x.UeId });

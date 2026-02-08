@@ -1,13 +1,8 @@
 namespace UniversiteDomain.Exceptions.NoteExceptions;
 
-// NoteOnUeNotInParcoursException
-
+[Serializable]
 public class InvalidNoteValeurException : Exception
 {
-    public InvalidNoteValeurException() : base()
-    {
-    }
-    
     public InvalidNoteValeurException(string message) : base(message)
     {
     }

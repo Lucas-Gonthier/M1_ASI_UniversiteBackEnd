@@ -6,10 +6,27 @@ namespace UniversiteDomain.UseCases.NoteUseCases.Create;
 
 public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
 {
+    public async Task<Note> ExecuteAsync(long etudiantId, long ueId, float valeur)
+    {
+        var etudiants = await repositoryFactory.EtudiantRepository()
+            .FindByConditionAsync(e => e.EtudiantId == etudiantId);
+        if (etudiants == null || etudiants.Count == 0)
+            throw new ArgumentException($"Étudiant avec l'ID {etudiantId} non trouvé");
+
+        var ues = await repositoryFactory.UeRepository()
+            .FindByConditionAsync(u => u.UeId == ueId);
+        if (ues == null || ues.Count == 0)
+            throw new ArgumentException($"UE avec l'ID {ueId} non trouvée");
+
+        return await ExecuteAsync(etudiants[0], ues[0], valeur);
+    }
+
     public async Task<Note> ExecuteAsync(Etudiant etudiant, Ue ue, float valeur)
     {
         var note = new Note
         {
+            EtudiantId = etudiant.EtudiantId,
+            UeId = ue.UeId,
             Valeur = valeur
         };
         return await ExecuteAsync(etudiant, note, ue);
