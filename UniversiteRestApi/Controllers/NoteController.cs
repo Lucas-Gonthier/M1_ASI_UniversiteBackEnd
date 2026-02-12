@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Dtos;
 using UniversiteDomain.Entities;
+using UniversiteDomain.Exceptions.NoteExceptions;
 using UniversiteDomain.UseCases.NoteUseCases.Create;
+using UniversiteDomain.UseCases.NoteUseCases.Csv;
 using UniversiteDomain.UseCases.NoteUseCases.Delete;
 using UniversiteDomain.UseCases.NoteUseCases.Get;
 using UniversiteDomain.UseCases.NoteUseCases.Update;
@@ -153,6 +155,54 @@ public class NoteController(IRepositoryFactory repositoryFactory) : ControllerBa
         {
             await new DeleteNoteUseCase(repositoryFactory).ExecuteAsync(etudiantId, ueId);
             return NoContent();
+        }
+        catch (Exception e)
+        {
+            ModelState.AddModelError("note", e.Message);
+            return ValidationProblem();
+        }
+    }
+
+    [HttpGet("ue/{ueId:long}/csv")]
+    public async Task<ActionResult> GetCsvAsync(long ueId)
+    {
+        var (role, _) = GetAuthenticatedUser();
+
+        if (!GenerateCsvNotesUeUseCase.IsAuthorized(role))
+            return Unauthorized();
+
+        try
+        {
+            var csvBytes = await new GenerateCsvNotesUeUseCase(repositoryFactory).ExecuteAsync(ueId);
+            return File(csvBytes, "text/csv", $"notes_UE_{ueId}.csv");
+        }
+        catch (Exception e)
+        {
+            ModelState.AddModelError("note", e.Message);
+            return ValidationProblem();
+        }
+    }
+
+    [HttpPost("ue/{ueId:long}/csv")]
+    public async Task<ActionResult> PostCsvAsync(long ueId, IFormFile fichierCsv)
+    {
+        var (role, _) = GetAuthenticatedUser();
+
+        if (!ImportCsvNotesUeUseCase.IsAuthorized(role))
+            return Unauthorized();
+
+        if (fichierCsv == null || fichierCsv.Length == 0)
+            return BadRequest("Aucun fichier CSV fourni");
+
+        try
+        {
+            using var stream = fichierCsv.OpenReadStream();
+            var resultat = await new ImportCsvNotesUeUseCase(repositoryFactory).ExecuteAsync(ueId, stream);
+            return Ok(resultat);
+        }
+        catch (InvalidCsvException e)
+        {
+            return BadRequest(new { e.Message, e.Erreurs });
         }
         catch (Exception e)
         {

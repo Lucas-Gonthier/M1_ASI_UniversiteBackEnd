@@ -8,13 +8,17 @@ public class UpdateParcoursUseCase(IRepositoryFactory repositoryFactory)
 {
     public async Task<Parcours> ExecuteAsync(Parcours parcours)
     {
-        await CheckBusinessRules(parcours);
-        await repositoryFactory.ParcoursRepository().UpdateAsync(parcours);
+        var existing = await CheckBusinessRules(parcours);
+
+        existing.NomParcours = parcours.NomParcours;
+        existing.AnneeFormation = parcours.AnneeFormation;
+
+        await repositoryFactory.ParcoursRepository().UpdateAsync(existing);
         await repositoryFactory.ParcoursRepository().SaveChangesAsync();
-        return parcours;
+        return existing;
     }
 
-    private async Task CheckBusinessRules(Parcours parcours)
+    private async Task<Parcours> CheckBusinessRules(Parcours parcours)
     {
         ArgumentNullException.ThrowIfNull(parcours);
         ArgumentNullException.ThrowIfNull(repositoryFactory);
@@ -29,6 +33,8 @@ public class UpdateParcoursUseCase(IRepositoryFactory repositoryFactory)
         // Vérifier le nom
         if (string.IsNullOrWhiteSpace(parcours.NomParcours) || parcours.NomParcours.Length < 2)
             throw new InvalidNomParcoursException(parcours.NomParcours + " doit contenir au moins 2 caractères");
+
+        return existing[0];
     }
 
     public static bool IsAuthorized(string role)

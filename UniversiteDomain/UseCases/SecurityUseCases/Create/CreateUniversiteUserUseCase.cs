@@ -7,14 +7,13 @@ namespace UniversiteDomain.UseCases.SecurityUseCases.Create;
 
 public class CreateUniversiteUserUseCase(IRepositoryFactory factory)
 {
-    public async Task<IUniversiteUser?> ExecuteAsync(string email, string userName, string password, string role,
+    public async Task ExecuteAsync(string email, string userName, string password, string role,
         Etudiant? etudiant)
     {
         await CheckBusinessRules(userName, password, role, etudiant);
-        var userCree = await factory.UniversiteUserRepository()
+        await factory.UniversiteUserRepository()
             .AddUserAsync(email, userName, password, role, etudiant);
         await factory.SaveChangesAsync();
-        return userCree;
     }
 
     private async Task CheckBusinessRules(string userName, string password, string role, Etudiant? etudiant)

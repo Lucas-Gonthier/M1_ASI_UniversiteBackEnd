@@ -9,7 +9,7 @@ public class GetNotesByUeUseCase(IRepositoryFactory repositoryFactory)
     {
         ArgumentNullException.ThrowIfNull(repositoryFactory);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(ueId);
-        
+
         return await repositoryFactory.NoteRepository()
             .FindByConditionAsync(n => n.UeId == ueId);
     }

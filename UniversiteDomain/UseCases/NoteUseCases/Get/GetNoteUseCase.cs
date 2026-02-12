@@ -10,7 +10,7 @@ public class GetNoteUseCase(IRepositoryFactory repositoryFactory)
         ArgumentNullException.ThrowIfNull(repositoryFactory);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(etudiantId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(ueId);
-        
+
         var noteList = await repositoryFactory.NoteRepository()
             .FindByConditionAsync(n => n.EtudiantId == etudiantId && n.UeId == ueId);
         return noteList.FirstOrDefault();

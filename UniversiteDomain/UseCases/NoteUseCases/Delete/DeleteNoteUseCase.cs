@@ -8,11 +8,11 @@ public class DeleteNoteUseCase(IRepositoryFactory repositoryFactory)
     public async Task ExecuteAsync(long etudiantId, long ueId)
     {
         await CheckBusinessRules(etudiantId, ueId);
-        
+
         var noteList = await repositoryFactory.NoteRepository()
             .FindByConditionAsync(n => n.EtudiantId == etudiantId && n.UeId == ueId);
         var note = noteList.FirstOrDefault();
-        
+
         if (note != null)
         {
             await repositoryFactory.NoteRepository().DeleteAsync(note);

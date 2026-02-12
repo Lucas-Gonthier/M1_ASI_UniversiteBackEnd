@@ -9,7 +9,7 @@ public class GetParcoursUseCase(IRepositoryFactory repositoryFactory)
     {
         ArgumentNullException.ThrowIfNull(repositoryFactory);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
-        
+
         var parcoursList = await repositoryFactory.ParcoursRepository()
             .FindByConditionAsync(p => p.ParcoursId == id);
         return parcoursList.FirstOrDefault();

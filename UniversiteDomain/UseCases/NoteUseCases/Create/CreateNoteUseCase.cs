@@ -41,7 +41,7 @@ public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
         return et;
     }
 
-    private static Task CheckBusinessRules(Etudiant etudiant, Note note, Ue ue)
+    private async Task CheckBusinessRules(Etudiant etudiant, Note note, Ue ue)
     {
         ArgumentNullException.ThrowIfNull(etudiant);
         ArgumentNullException.ThrowIfNull(note);
@@ -57,18 +57,39 @@ public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
             throw new InvalidNoteValeurException(
                 $"{note.Valeur} incorrect - Une note doit être comprise entre 0 et 20");
 
-        if (etudiant.Notes.Any(n => n.UeId == ue.UeId))
+        // Vérifier doublon
+        var existing = await repositoryFactory.NoteRepository()
+            .FindByConditionAsync(n => n.EtudiantId == etudiant.EtudiantId && n.UeId == ue.UeId);
+        if (existing is { Count: > 0 })
             throw new DuplicateNoteOnUeException(
                 $"L'étudiant {etudiant.EtudiantId} a déjà une note pour l'UE {ue.UeId}");
 
-        var ueInParcours = etudiant.ParcoursSuivi?.UEsEnseignees.Any(u => u.UeId == ue.UeId) == true;
-        if (!ueInParcours)
+        // Vérifier que l'étudiant est inscrit à un parcours contenant cette UE
+        if (etudiant.ParcoursId == null)
+            throw new NoteOnUeNotInParcoursException(
+                $"L'étudiant {etudiant.EtudiantId} n'est inscrit à aucun parcours");
+
+        var parcoursList = await repositoryFactory.ParcoursRepository()
+            .FindByConditionAsync(p => p.ParcoursId == etudiant.ParcoursId);
+        if (parcoursList is not { Count: > 0 })
             throw new NoteOnUeNotInParcoursException(
                 $"L'étudiant {etudiant.EtudiantId} n'est pas inscrit à l'UE {ue.UeId}");
 
-        return Task.CompletedTask;
+        var parcours = parcoursList[0];
+        // Charger les UEs du parcours via le repo dédié
+        var ueInParcours = parcours.UEsEnseignees.Any(u => u.UeId == ue.UeId);
+        if (!ueInParcours)
+        {
+            // Les UEs ne sont peut-être pas chargées, vérifions via la DB
+            var parcoursComplet = await repositoryFactory.ParcoursRepository()
+                .FindByConditionAsync(p => p.ParcoursId == etudiant.ParcoursId
+                                           && p.UEsEnseignees.Any(u => u.UeId == ue.UeId));
+            if (parcoursComplet is not { Count: > 0 })
+                throw new NoteOnUeNotInParcoursException(
+                    $"L'étudiant {etudiant.EtudiantId} n'est pas inscrit à l'UE {ue.UeId}");
+        }
     }
-    
+
     public static bool IsAuthorized(string role)
     {
         return role.Equals(Roles.Responsable) || role.Equals(Roles.Scolarite);

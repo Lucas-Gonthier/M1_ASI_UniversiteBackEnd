@@ -8,13 +8,18 @@ public class UpdateEtudiantUseCase(IRepositoryFactory repositoryFactory)
 {
     public async Task<Etudiant> ExecuteAsync(Etudiant etudiant)
     {
-        await CheckBusinessRules(etudiant);
-        await repositoryFactory.EtudiantRepository().UpdateAsync(etudiant);
+        var existing = await CheckBusinessRules(etudiant);
+
+        existing.Nom = etudiant.Nom;
+        existing.Prenom = etudiant.Prenom;
+        existing.Email = etudiant.Email;
+
+        await repositoryFactory.EtudiantRepository().UpdateAsync(existing);
         await repositoryFactory.EtudiantRepository().SaveChangesAsync();
-        return etudiant;
+        return existing;
     }
 
-    private async Task CheckBusinessRules(Etudiant etudiant)
+    private async Task<Etudiant> CheckBusinessRules(Etudiant etudiant)
     {
         ArgumentNullException.ThrowIfNull(etudiant);
         ArgumentNullException.ThrowIfNull(repositoryFactory);
@@ -33,6 +38,8 @@ public class UpdateEtudiantUseCase(IRepositoryFactory repositoryFactory)
         // Vérifier le prénom
         if (string.IsNullOrWhiteSpace(etudiant.Prenom) || etudiant.Prenom.Length < 3)
             throw new InvalidPrenomEtudiantException(etudiant.Prenom + " doit contenir au moins 3 caractères");
+
+        return existing[0];
     }
 
     public static bool IsAuthorized(string role)

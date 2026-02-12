@@ -3,9 +3,9 @@
 public class Parcours
 {
     public long ParcoursId { get; set; }
-    public string NomParcours { get; init; } = string.Empty;
+    public string NomParcours { get; set; } = string.Empty;
 
-    public int AnneeFormation { get; init; } = 1;
+    public int AnneeFormation { get; set; } = 1;
 
     public List<Etudiant>? Inscrits { get; init; } = [];
 

@@ -24,13 +24,7 @@ public class ParcoursUnitTest
         const string nomParcours = "UE 1";
         const int anneeFormation = 2;
 
-        var parcoursAvant = new Parcours
-        {
-            NomParcours = nomParcours,
-            AnneeFormation = anneeFormation
-        };
-
-        var parcoursFinal = new Parcours
+        var parcours = new Parcours
         {
             ParcoursId = idParcours,
             NomParcours = nomParcours,
@@ -40,12 +34,12 @@ public class ParcoursUnitTest
         var mockParcoursRepo = new Mock<IParcoursRepository>();
 
         mockParcoursRepo
-            .Setup(r => r.FindByConditionAsync(p => p.ParcoursId == idParcours))
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
             .ReturnsAsync([]);
 
         mockParcoursRepo
-            .Setup(r => r.CreateAsync(parcoursAvant))
-            .ReturnsAsync(parcoursFinal);
+            .Setup(r => r.CreateAsync(parcours))
+            .ReturnsAsync(parcours);
 
         var mockFactory = new Mock<IRepositoryFactory>();
         mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
@@ -53,14 +47,14 @@ public class ParcoursUnitTest
         var useCase = new CreateParcoursUseCase(mockFactory.Object);
 
         // Act
-        var result = await useCase.ExecuteAsync(parcoursAvant);
+        var result = await useCase.ExecuteAsync(parcours);
 
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(result.ParcoursId, Is.EqualTo(parcoursFinal.ParcoursId));
-            Assert.That(result.NomParcours, Is.EqualTo(parcoursFinal.NomParcours));
-            Assert.That(result.AnneeFormation, Is.EqualTo(parcoursFinal.AnneeFormation));
+            Assert.That(result.ParcoursId, Is.EqualTo(parcours.ParcoursId));
+            Assert.That(result.NomParcours, Is.EqualTo(parcours.NomParcours));
+            Assert.That(result.AnneeFormation, Is.EqualTo(parcours.AnneeFormation));
         });
     }
 
@@ -184,7 +178,7 @@ public class ParcoursUnitTest
             Assert.That(result.UEsEnseignees, Is.Not.Null);
             Assert.That(result.UEsEnseignees, Has.Count.EqualTo(1));
             Assert.That(result.UEsEnseignees[0].UeId, Is.EqualTo(idUe));
-            Assert.That(result.UEsEnseignees[0].Intitule, Is.EqualTo("UE1"));
+            Assert.That(result.UEsEnseignees[0].Intitule, Is.EqualTo("Unité d'enseignement 1"));
         });
     }
 }

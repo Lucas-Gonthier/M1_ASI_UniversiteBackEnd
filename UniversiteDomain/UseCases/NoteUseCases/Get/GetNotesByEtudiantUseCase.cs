@@ -9,7 +9,7 @@ public class GetNotesByEtudiantUseCase(IRepositoryFactory repositoryFactory)
     {
         ArgumentNullException.ThrowIfNull(repositoryFactory);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(etudiantId);
-        
+
         return await repositoryFactory.NoteRepository()
             .FindByConditionAsync(n => n.EtudiantId == etudiantId);
     }

@@ -18,9 +18,4 @@ public class IsInRoleUseCase(IRepositoryFactory factory)
         ArgumentNullException.ThrowIfNull(factory.UniversiteUserRepository());
         return Task.CompletedTask;
     }
-
-    public static bool IsAuthorized(string role)
-    {
-        return role.Equals(Roles.Responsable) || role.Equals(Roles.Scolarite) || role.Equals(Roles.Etudiant);
-    }
 }

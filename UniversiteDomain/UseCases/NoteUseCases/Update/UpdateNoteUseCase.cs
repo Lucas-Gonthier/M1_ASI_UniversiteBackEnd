@@ -8,15 +8,15 @@ public class UpdateNoteUseCase(IRepositoryFactory repositoryFactory)
     public async Task<Note> ExecuteAsync(long etudiantId, long ueId, float valeur)
     {
         await CheckBusinessRules(etudiantId, ueId, valeur);
-        
+
         var noteList = await repositoryFactory.NoteRepository()
             .FindByConditionAsync(n => n.EtudiantId == etudiantId && n.UeId == ueId);
         var note = noteList.First();
-        
+
         note.Valeur = valeur;
         await repositoryFactory.NoteRepository().UpdateAsync(note);
         await repositoryFactory.NoteRepository().SaveChangesAsync();
-        
+
         return note;
     }
 
