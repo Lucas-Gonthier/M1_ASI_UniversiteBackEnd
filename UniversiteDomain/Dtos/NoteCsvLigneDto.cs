@@ -4,12 +4,12 @@ namespace UniversiteDomain.Dtos;
 
 public class NoteCsvLigneDto
 {
-    public string NumEtud { get; set; } = string.Empty;
-    public string Nom { get; set; } = string.Empty;
-    public string Prenom { get; set; } = string.Empty;
-    public string NumeroUe { get; set; } = string.Empty;
-    public string IntituleUe { get; set; } = string.Empty;
-    public float? Note { get; set; }
+    public string NumEtud { get; init; } = string.Empty;
+    public string Nom { get; init; } = string.Empty;
+    public string Prenom { get; init; } = string.Empty;
+    public string NumeroUe { get; init; } = string.Empty;
+    public string IntituleUe { get; init; } = string.Empty;
+    public float? Note { get; init; }
 }
 
 public sealed class NoteCsvLigneDtoMap : ClassMap<NoteCsvLigneDto>

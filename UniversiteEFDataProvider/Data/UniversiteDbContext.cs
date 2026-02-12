@@ -15,7 +15,7 @@ public class UniversiteDbContext : IdentityDbContext<UniversiteUser, UniversiteR
     {
     }
 
-    public UniversiteDbContext() : base()
+    public UniversiteDbContext()
     {
     }
 

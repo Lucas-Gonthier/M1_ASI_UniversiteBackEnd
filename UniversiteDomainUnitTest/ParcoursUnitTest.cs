@@ -6,6 +6,8 @@ using UniversiteDomain.Entities;
 using UniversiteDomain.UseCases.ParcoursUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.EtudiantDansParcours;
 using UniversiteDomain.UseCases.ParcoursUseCases.UeDansParcours;
+using UniversiteDomain.UseCases.ParcoursUseCases.Update;
+using UniversiteDomain.UseCases.ParcoursUseCases.Delete;
 
 namespace UniversiteDomainUnitTest;
 
@@ -180,5 +182,79 @@ public class ParcoursUnitTest
             Assert.That(result.UEsEnseignees[0].UeId, Is.EqualTo(idUe));
             Assert.That(result.UEsEnseignees[0].Intitule, Is.EqualTo("Unité d'enseignement 1"));
         });
+    }
+
+    [Test]
+    public async Task UpdateParcoursUseCase()
+    {
+        // Arrange
+        var parcoursExistant = new Parcours
+        {
+            ParcoursId = 1,
+            NomParcours = "M1",
+            AnneeFormation = 1
+        };
+
+        var parcoursModifie = new Parcours
+        {
+            ParcoursId = 1,
+            NomParcours = "M1 Modifié",
+            AnneeFormation = 2
+        };
+
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
+
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
+            .ReturnsAsync([parcoursExistant]);
+
+        var mockFactory = new Mock<IRepositoryFactory>();
+        mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
+
+        var useCase = new UpdateParcoursUseCase(mockFactory.Object);
+
+        // Act
+        var result = await useCase.ExecuteAsync(parcoursModifie);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ParcoursId, Is.EqualTo(1));
+            Assert.That(result.NomParcours, Is.EqualTo("M1 Modifié"));
+            Assert.That(result.AnneeFormation, Is.EqualTo(2));
+        });
+    }
+
+    [Test]
+    public Task DeleteParcoursUseCase()
+    {
+        const long parcoursId = 1;
+
+        var parcoursExistant = new Parcours
+        {
+            ParcoursId = parcoursId,
+            NomParcours = "M1",
+            AnneeFormation = 1
+        };
+
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
+
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
+            .ReturnsAsync([parcoursExistant]);
+
+        mockParcoursRepo
+            .Setup(r => r.DeleteAsync(parcoursId))
+            .Returns(Task.CompletedTask);
+
+        var mockFactory = new Mock<IRepositoryFactory>();
+        mockFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
+
+        var useCase = new DeleteParcoursUseCase(mockFactory.Object);
+
+        Assert.DoesNotThrowAsync(async () => await useCase.ExecuteAsync(parcoursId));
+
+        mockParcoursRepo.Verify(r => r.DeleteAsync(parcoursId), Times.Once);
+        return Task.CompletedTask;
     }
 }

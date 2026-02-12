@@ -4,6 +4,8 @@ using UniversiteDomain.DataAdapters;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
 using UniversiteDomain.UseCases.NoteUseCases.Create;
+using UniversiteDomain.UseCases.NoteUseCases.Update;
+using UniversiteDomain.UseCases.NoteUseCases.Delete;
 using UniversiteDomain.UseCases.NoteUseCases.Csv;
 
 namespace UniversiteDomainUnitTest;
@@ -22,7 +24,7 @@ public class NoteUnitTest
         const long idParcours = 1;
         const string nomParcours = "Parcours 1";
         const int anneeFormation = 1;
-        
+
         const long id = 1;
         const string numEtud = "et1";
         const string nom = "Durant";
@@ -43,7 +45,7 @@ public class NoteUnitTest
             AnneeFormation = anneeFormation,
             UEsEnseignees = [ue]
         };
-        
+
         var etudiant = new Etudiant
         {
             EtudiantId = id,
@@ -51,17 +53,26 @@ public class NoteUnitTest
             Nom = nom,
             Prenom = prenom,
             Email = email,
+            ParcoursId = idParcours,
             ParcoursSuivi = parcours
         };
-        
+
         var mockNoteRepo = new Mock<INoteRepository>();
-        
         mockNoteRepo
             .Setup(r => r.CreateAsync(It.IsAny<Note>()))
-            .ReturnsAsync((Note n) => n); // retourne la note passée en paramètre
-        
+            .ReturnsAsync((Note n) => n);
+        mockNoteRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Note, bool>>>()))
+            .ReturnsAsync([]); // pas de doublon
+
+        var mockParcoursRepo = new Mock<IParcoursRepository>();
+        mockParcoursRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
+            .ReturnsAsync([parcours]);
+
         var mockRepositoryFactory = new Mock<IRepositoryFactory>();
         mockRepositoryFactory.Setup(f => f.NoteRepository()).Returns(mockNoteRepo.Object);
+        mockRepositoryFactory.Setup(f => f.ParcoursRepository()).Returns(mockParcoursRepo.Object);
 
         // Act
         var note = await new CreateNoteUseCase(mockRepositoryFactory.Object).ExecuteAsync(etudiant, ue, 15.5f);
@@ -72,6 +83,81 @@ public class NoteUnitTest
             Assert.That(note, Is.Not.Null);
             Assert.That(note.Valeur, Is.EqualTo(15.5f));
         });
+    }
+
+    [Test]
+    public async Task UpdateNoteUseCase()
+    {
+        // Arrange
+        const long etudiantId = 1;
+        const long ueId = 1;
+        const float nouvelleValeur = 18.0f;
+
+        var noteExistante = new Note
+        {
+            EtudiantId = etudiantId,
+            UeId = ueId,
+            Valeur = 12.0f
+        };
+
+        var mockNoteRepo = new Mock<INoteRepository>();
+
+        mockNoteRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Note, bool>>>()))
+            .ReturnsAsync([noteExistante]);
+
+        var mockFactory = new Mock<IRepositoryFactory>();
+        mockFactory.Setup(f => f.NoteRepository()).Returns(mockNoteRepo.Object);
+
+        var useCase = new UpdateNoteUseCase(mockFactory.Object);
+
+        // Act
+        var result = await useCase.ExecuteAsync(etudiantId, ueId, nouvelleValeur);
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.EtudiantId, Is.EqualTo(etudiantId));
+            Assert.That(result.UeId, Is.EqualTo(ueId));
+            Assert.That(result.Valeur, Is.EqualTo(nouvelleValeur));
+        });
+    }
+
+    [Test]
+    public Task DeleteNoteUseCase()
+    {
+        // Arrange
+        const long etudiantId = 1;
+        const long ueId = 1;
+
+        var noteExistante = new Note
+        {
+            EtudiantId = etudiantId,
+            UeId = ueId,
+            Valeur = 12.0f
+        };
+
+        var mockNoteRepo = new Mock<INoteRepository>();
+
+        mockNoteRepo
+            .Setup(r => r.FindByConditionAsync(It.IsAny<Expression<Func<Note, bool>>>()))
+            .ReturnsAsync([noteExistante]);
+
+        mockNoteRepo
+            .Setup(r => r.DeleteAsync(noteExistante))
+            .Returns(Task.CompletedTask);
+
+        var mockFactory = new Mock<IRepositoryFactory>();
+        mockFactory.Setup(f => f.NoteRepository()).Returns(mockNoteRepo.Object);
+
+        var useCase = new DeleteNoteUseCase(mockFactory.Object);
+
+        // Act & Assert — ne doit pas lever d'exception
+        Assert.DoesNotThrowAsync(async () => await useCase.ExecuteAsync(etudiantId, ueId));
+
+        // Vérifier que DeleteAsync a été appelé
+        mockNoteRepo.Verify(r => r.DeleteAsync(noteExistante), Times.Once);
+        return Task.CompletedTask;
     }
 
     [Test]
